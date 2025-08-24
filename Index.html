@@ -1,0 +1,306 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instruções de Exclusão de Dados - App n8n Instagram</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #fff;
+            padding: 40px 40px 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .info-section {
+            background: #f8f9fa;
+            padding: 24px;
+            border-radius: 6px;
+            margin-bottom: 32px;
+            border-left: 3px solid #007bff;
+        }
+
+        .info-section p {
+            margin: 0;
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        .steps-title {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+
+        .steps-list {
+            list-style: none;
+            margin-bottom: 32px;
+        }
+
+        .steps-list li {
+            padding: 16px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .steps-list li:last-child {
+            border-bottom: none;
+        }
+
+        .step-number {
+            background: #007bff;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 16px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content strong {
+            color: #2c3e50;
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .step-content p {
+            color: #666;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .contact-section {
+            background: #f8f9fa;
+            padding: 24px;
+            border-radius: 6px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .contact-section h3 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .contact-section p {
+            color: #666;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+
+        .email-link {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .email-link:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            text-align: center;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .app-name {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 10px;
+            }
+
+            .container {
+                border-radius: 6px;
+            }
+
+            .header, .content, .footer {
+                padding: 24px 20px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .steps-list li {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .step-number {
+                margin-bottom: 8px;
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Instruções de Exclusão de Dados</h1>
+            <p>App n8n Instagram</p>
+        </div>
+
+        <div class="content">
+            <div class="info-section">
+                <p>
+                    Nosso aplicativo <span class="app-name">app_n8n</span> integra o Instagram com o n8n para automações. Não armazenamos dados pessoais de usuários de forma persistente. Todos os dados são processados em tempo real e permanecem no Instagram ou no seu ambiente n8n.
+                </p>
+            </div>
+
+            <h2 class="steps-title">Para excluir qualquer acesso ou dados relacionados:</h2>
+
+            <ol class="steps-list">
+                <li>
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <strong>Acesse as configurações da sua conta</strong>
+                        <p>Vá para as configurações da sua conta no Facebook/Instagram.</p>
+                    </div>
+                </li>
+                <li>
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <strong>Navegue até Apps e Sites</strong>
+                        <p>Vá para "Configurações e Privacidade" > "Configurações" > "Apps e Sites".</p>
+                    </div>
+                </li>
+                <li>
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <strong>Encontre o aplicativo</strong>
+                        <p>Encontre <span class="app-name">app_n8n</span> na lista de apps conectados.</p>
+                    </div>
+                </li>
+                <li>
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <strong>Remova o acesso</strong>
+                        <p>Clique em "Remover" para revogar o acesso. Isso remove qualquer permissão que o app tenha aos seus dados.</p>
+                    </div>
+                </li>
+                <li>
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <strong>Limpeza no n8n (opcional)</strong>
+                        <p>Se você usar n8n self-hosted, delete manualmente qualquer workflow relacionado no seu n8n.</p>
+                    </div>
+                </li>
+            </ol>
+
+            <div class="contact-section">
+                <h3>Precisa de ajuda?</h3>
+                <p>Se precisar de assistência, entre em contato:</p>
+                <a href="mailto:gestaoia.online@gmail.com" class="email-link">gestaoia.online@gmail.com</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Última atualização: 24 de agosto de 2025</p>
+        </div>
+    </div>
+</body>
+</html>
